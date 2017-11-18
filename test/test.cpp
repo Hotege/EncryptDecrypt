@@ -28,7 +28,7 @@ int main(int argc, char* argv[])
 	EncryptDecrypt ed;
 	clock_t enT1 = clock();
 	int enSize = 0;
-	unsigned char* encrypt = ed.encrypt(enSize, filename, key, keySize);
+	unsigned char* encrypt = ed.encrypt(enSize, filename, key, keySize, EDSP_FAST, EDCO_ADVANCED);
 	clock_t enT2 = clock();
 	printf("encrypt time: %d ms.\n", (enT2 - enT1) / 1000);
 	FILE* out = fopen(encryptname, "wb");
@@ -36,7 +36,7 @@ int main(int argc, char* argv[])
 	fclose(out);
 	clock_t deT1 = clock();
 	int deSize = 0;
-	unsigned char* decrypt = ed.decrypt(deSize, encryptname, key, keySize);
+	unsigned char* decrypt = ed.decrypt(deSize, encryptname, key, keySize, EDSP_FAST, EDCO_ADVANCED);
 	clock_t deT2 = clock();
 	printf("decrypt time: %d ms.\n", (deT2 - deT1) / 1000);
 	FILE* in = fopen(decryptname, "wb");
