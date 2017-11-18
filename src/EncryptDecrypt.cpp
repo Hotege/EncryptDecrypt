@@ -60,13 +60,13 @@ unsigned char* EncryptDecrypt::encrypt(const unsigned char* buffer, const int si
 	// md5 for sub-key
 	unsigned int md5[4];
 	aa.getMD5Value(md5, key, keySize);
-	unsigned short subKey[8];
+	unsigned short subKey[4 * sizeof(unsigned int) / sizeof(unsigned short)];
 	memcpy(subKey, md5, sizeof(unsigned int) * 4);
 	int roundID = 0;
 	for (int i = 0; i < size; i++)
 	{
 		result[i] = pEnMap[subKey[roundID]][buffer[i]];
-		roundID = ((roundID + 1) & ((sizeof(unsigned short) << 3) - 1)) == 0 ? 0 : roundID + 1;
+		roundID = ((roundID + 1) & (4 * sizeof(unsigned int) / sizeof(unsigned short) - 1)) == 0 ? 0 : roundID + 1;
 	}
 	releaseBuffers(pEnMap, 1 << (sizeof(unsigned short) << 3));
 	return result;
@@ -115,13 +115,13 @@ unsigned char* EncryptDecrypt::decrypt(const unsigned char* buffer, const int si
 	// md5 for sub-key
 	unsigned int md5[4];
 	aa.getMD5Value(md5, key, keySize);
-	unsigned short subKey[8];
+	unsigned short subKey[4 * sizeof(unsigned int) / sizeof(unsigned short)];
 	memcpy(subKey, md5, sizeof(unsigned int) * 4);
 	int roundID = 0;
 	for (int i = 0; i < size; i++)
 	{
 		result[i] = pDeMap[subKey[roundID]][buffer[i]];
-		roundID = ((roundID + 1) & ((sizeof(unsigned short) << 3) - 1)) == 0 ? 0 : roundID + 1;
+		roundID = ((roundID + 1) & (4 * sizeof(unsigned int) / sizeof(unsigned short) - 1)) == 0 ? 0 : roundID + 1;
 	}
 	releaseBuffers(pEnMap, 1 << (sizeof(unsigned short) << 3));
 	releaseBuffers(pDeMap, 1 << (sizeof(unsigned short) << 3));
