@@ -20,14 +20,12 @@ void releaseBuffers(unsigned char** buffer, int size)
 
 EncryptDecrypt::EncryptDecrypt()
 {
-	m_EnMap = NULL;
-	m_DeMap = NULL;
+
 }
 
 EncryptDecrypt::~EncryptDecrypt()
 {
-	releaseBuffers(m_EnMap, 1 << (sizeof(unsigned short) << 3));
-	releaseBuffers(m_DeMap, 1 << (sizeof(unsigned short) << 3));
+
 }
 
 void shuffle(unsigned char* buffer, int size, Random* rd)
@@ -49,15 +47,15 @@ unsigned char* EncryptDecrypt::encrypt(const unsigned char* buffer, const int si
 	// crc32 for random map
 	unsigned int crc32 = aa.getCRC32Value(key, keySize);
 	rd.srand(crc32);
-	releaseBuffers(m_EnMap, 1 << (sizeof(unsigned short) << 3));
-	m_EnMap = new unsigned char*[1 << (sizeof(unsigned short) << 3)];
+	unsigned char** pEnMap = NULL;
+	pEnMap = new unsigned char*[1 << (sizeof(unsigned short) << 3)];
 	for (int i = 0; i < (1 << (sizeof(unsigned short) << 3)); i++)
 	{
-		m_EnMap[i] = new unsigned char[256];
+		pEnMap[i] = new unsigned char[256];
 		for (int j = 0; j < 256; j++)
-			m_EnMap[i][j] = j;
+			pEnMap[i][j] = j;
 		// shuffle by random number
-		shuffle(m_EnMap[i], 256, &rd);
+		shuffle(pEnMap[i], 256, &rd);
 	}
 	// md5 for sub-key
 	unsigned int md5[4];
@@ -67,9 +65,10 @@ unsigned char* EncryptDecrypt::encrypt(const unsigned char* buffer, const int si
 	int roundID = 0;
 	for (int i = 0; i < size; i++)
 	{
-		result[i] = m_EnMap[subKey[roundID]][buffer[i]];
+		result[i] = pEnMap[subKey[roundID]][buffer[i]];
 		roundID = ((roundID + 1) & ((sizeof(unsigned short) << 3) - 1)) == 0 ? 0 : roundID + 1;
 	}
+	releaseBuffers(pEnMap, 1 << (sizeof(unsigned short) << 3));
 	return result;
 }
 
@@ -97,21 +96,21 @@ unsigned char* EncryptDecrypt::decrypt(const unsigned char* buffer, const int si
 	// crc32 for random map
 	unsigned int crc32 = aa.getCRC32Value(key, keySize);
 	rd.srand(crc32);
-	releaseBuffers(m_EnMap, 1 << (sizeof(unsigned short) << 3));
-	m_EnMap = new unsigned char*[1 << (sizeof(unsigned short) << 3)];
-	releaseBuffers(m_DeMap, 1 << (sizeof(unsigned short) << 3));
-	m_DeMap = new unsigned char*[1 << (sizeof(unsigned short) << 3)];
+	unsigned char** pEnMap = NULL;
+	unsigned char** pDeMap = NULL;
+	pEnMap = new unsigned char*[1 << (sizeof(unsigned short) << 3)];
+	pDeMap = new unsigned char*[1 << (sizeof(unsigned short) << 3)];
 	for (int i = 0; i < (1 << (sizeof(unsigned short) << 3)); i++)
 	{
-		m_EnMap[i] = new unsigned char[256];
+		pEnMap[i] = new unsigned char[256];
 		for (int j = 0; j < 256; j++)
-			m_EnMap[i][j] = j;
+			pEnMap[i][j] = j;
 		// shuffle by random number
-		shuffle(m_EnMap[i], 256, &rd);
+		shuffle(pEnMap[i], 256, &rd);
 		// calculate decrypt map
-		m_DeMap[i] = new unsigned char[256];
+		pDeMap[i] = new unsigned char[256];
 		for (int j = 0; j < 256; j++)
-			m_DeMap[i][m_EnMap[i][j]] = j;
+			pDeMap[i][pEnMap[i][j]] = j;
 	}
 	// md5 for sub-key
 	unsigned int md5[4];
@@ -121,9 +120,11 @@ unsigned char* EncryptDecrypt::decrypt(const unsigned char* buffer, const int si
 	int roundID = 0;
 	for (int i = 0; i < size; i++)
 	{
-		result[i] = m_DeMap[subKey[roundID]][buffer[i]];
+		result[i] = pDeMap[subKey[roundID]][buffer[i]];
 		roundID = ((roundID + 1) & ((sizeof(unsigned short) << 3) - 1)) == 0 ? 0 : roundID + 1;
 	}
+	releaseBuffers(pEnMap, 1 << (sizeof(unsigned short) << 3));
+	releaseBuffers(pDeMap, 1 << (sizeof(unsigned short) << 3));
 	return result;
 }
 
