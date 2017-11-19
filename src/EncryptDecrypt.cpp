@@ -32,7 +32,7 @@ void shuffle(unsigned char* buffer, int size, Random* rd)
 {
 	for (int i = 0; i < size; i++)
 	{
-		int id = rd->rand() % (size - i) + i;
+		int id = rd->random() % (size - i) + i;
 		unsigned char t = buffer[i];
 		buffer[i] = buffer[id];
 		buffer[id] = t;
@@ -46,7 +46,7 @@ unsigned char* EncryptDecrypt::encrypt(const unsigned char* buffer, const int si
 	Random rd;
 	// crc32 for random map
 	unsigned int crc32 = aa.getCRC32Value(key, keySize);
-	rd.srand(crc32);
+	rd.init(crc32);
 
 	unsigned int mapSize = 0;
 	switch (speed)
@@ -250,7 +250,7 @@ unsigned char* EncryptDecrypt::decrypt(const unsigned char* buffer, const int si
 	Random rd;
 	// crc32 for random map
 	unsigned int crc32 = aa.getCRC32Value(key, keySize);
-	rd.srand(crc32);
+	rd.init(crc32);
 
 	unsigned int mapSize = 0;
 	switch (speed)
