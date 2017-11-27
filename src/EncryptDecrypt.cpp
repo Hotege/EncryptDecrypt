@@ -43,7 +43,7 @@ unsigned char* EncryptDecrypt::encrypt(const unsigned char* buffer, const int si
 {
 	unsigned char* result = new unsigned char[size];
 	AbstractAlgorithm aa;
-	Random rd;
+	Random rd(false);
 	// crc32 for random map
 	unsigned int crc32 = aa.getCRC32Value(key, keySize);
 	rd.init(crc32);
@@ -247,7 +247,7 @@ unsigned char* EncryptDecrypt::decrypt(const unsigned char* buffer, const int si
 {
 	unsigned char* result = new unsigned char[size];
 	AbstractAlgorithm aa;
-	Random rd;
+	Random rd(false);
 	// crc32 for random map
 	unsigned int crc32 = aa.getCRC32Value(key, keySize);
 	rd.init(crc32);
